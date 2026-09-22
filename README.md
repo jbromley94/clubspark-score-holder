@@ -1,5 +1,7 @@
 # ScoreHolder
+
 [![CI](https://github.com/jbromley94/interviewTest/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/jbromley94/interviewTest/actions/workflows/ci.yaml)
+
 A dependency-free TypeScript implementation of the ClubSpark technical exercise.
 
 The core `ScoreHolder` maintains the latest score for each match while supporting multiple producers and consumers through one-shot waiting, persistent subscriptions and bounded score history.
