@@ -1,0 +1,26 @@
+{
+  "name": "score-holder",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "demo": "npm run build && node demo/server.cjs",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint . --error-on-warnings",
+    "format": "biome format --write .",
+    "check": "biome check . --error-on-warnings",
+    "check:fix": "biome check --write .",
+    "validate": "npm run typecheck && npm run check && npm test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "@types/node": "^24.13.6",
+    "@vitest/coverage-v8": "^5.0.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}
