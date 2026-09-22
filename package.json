@@ -1,7 +1,12 @@
 {
   "name": "score-holder",
   "version": "1.0.0",
-  "description": "",
+  "description": "ScoreHolder implementation without dependencies, in TypeScript, with optional Node HTTP demo",
+  "author": "Jordan Bromley",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "demo": "npm run build && node demo/server.cjs",
@@ -14,7 +19,6 @@
     "check:fix": "biome check --write .",
     "validate": "npm run typecheck && npm run check && npm test"
   },
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
