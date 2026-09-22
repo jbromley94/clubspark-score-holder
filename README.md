@@ -139,6 +139,22 @@ It uses Node's built-in HTTP functionality rather than introducing a framework o
 
 The server shares one `ScoreHolder` instance between requests, demonstrating how the class can be used by multiple HTTP consumers and producers.
 
+### Health check
+
+```text
+GET /health
+```
+
+Returns a lightweight liveness response confirming that the HTTP service is available:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+The endpoint deliberately does not inspect score state or external dependencies.
+
 ### Publish a score
 
 ```text
@@ -255,8 +271,8 @@ The project is developed and tested using Vitest.
 The current suite contains:
 
 ```text
-14 test files
-137 tests
+15 test files
+139 tests
 100% statement coverage
 100% branch coverage
 100% function coverage
@@ -363,7 +379,7 @@ For a production system I would consider additional concerns such as:
 - metrics and tracing
 - shared state or messaging between multiple application instances
 - durable event replay where required
-- deployment health/readiness checks
+- dependency-aware readiness checks
 - rate limiting and abuse protection
 
 Those concerns are kept outside the exercise implementation so that the core behaviour remains small, testable and easy to reason about.

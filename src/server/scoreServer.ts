@@ -56,6 +56,16 @@ async function handleRequest(
   waitTimeoutMs: number,
   heartbeatIntervalMs: number,
 ): Promise<void> {
+  if (request.url === '/health') {
+    if (request.method !== 'GET') {
+      response.setHeader('Allow', 'GET');
+      throw new HttpError(405, 'Method not allowed');
+    }
+
+    sendJson(response, 200, { status: 'ok' });
+    return;
+  }
+
   const route = /^\/matches\/([^/?]+)\/(score|history|next|events)(?:\?.*)?$/.exec(
     String(request.url),
   );
