@@ -17,10 +17,12 @@ export function createScoreServer(
 ): Server {
   const waitTimeoutMs = options.waitTimeoutMs ?? 30000;
   const heartbeatIntervalMs = options.heartbeatIntervalMs ?? 15000;
-  for (const interval of [waitTimeoutMs, heartbeatIntervalMs]) {
-    if (!Number.isSafeInteger(interval) || interval < 1 || interval > 2147483647) {
-      throw new RangeError('Server intervals must be integers between 1 and 2147483647 ms');
-    }
+  if (
+    [waitTimeoutMs, heartbeatIntervalMs].some(
+      (interval) => !Number.isSafeInteger(interval) || interval < 1 || interval > 2147483647,
+    )
+  ) {
+    throw new RangeError('Server intervals must be integers between 1 and 2147483647 ms');
   }
   return createServer(
     { requestTimeout: 10000, headersTimeout: 10000, maxHeaderSize: 8192 },
@@ -82,9 +84,9 @@ async function handleRequest(
   }
 
   const resource = route[2];
-  const allowedMethods = resource === 'score' ? 'GET, POST' : 'GET';
-  if (request.method !== 'GET' && !(request.method === 'POST' && resource === 'score')) {
-    response.setHeader('Allow', allowedMethods);
+  const allowedMethods = resource === 'score' ? ['GET', 'POST'] : ['GET'];
+  if (!allowedMethods.includes(String(request.method))) {
+    response.setHeader('Allow', allowedMethods.join(', '));
     throw new HttpError(405, 'Method not allowed');
   }
   if (resource === 'history') {
@@ -122,9 +124,5 @@ async function handleRequest(
   }
 
   response.setHeader('Location', `/matches/${encodeURIComponent(match)}/score`);
-  sendJson(
-    response,
-    201,
-    notificationErrors === undefined ? { match, score } : { match, score, notificationErrors },
-  );
+  sendJson(response, 201, { match, score, notificationErrors });
 }

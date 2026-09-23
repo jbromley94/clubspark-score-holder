@@ -34,12 +34,7 @@ export default class ScoreHolder implements IScoreHolder {
   /** Returns the latest stored score, or undefined if the match has no updates. */
   getScore(match: string): string | undefined {
     const history = this.histories.get(match);
-    if (!history) {
-      return undefined;
-    }
-
-    const index = history.nextIndex === 0 ? history.scores.length - 1 : history.nextIndex - 1;
-    return history.scores[index];
+    return history?.scores.at(history.nextIndex - 1);
   }
 
   /**
@@ -74,11 +69,9 @@ export default class ScoreHolder implements IScoreHolder {
    * @returns A promise that resolves to the next score or rejects with the abort reason.
    */
   waitForNextScore(match: string, signal?: AbortSignal): Promise<string> {
-    if (signal?.aborted) {
-      return Promise.reject(signal.reason);
-    }
-
     return new Promise<string>((resolve, reject) => {
+      signal?.throwIfAborted();
+
       const matchWaiters = this.waiters.get(match) ?? new Set<(score: string) => void>();
       let removeAbortListener: (() => void) | undefined;
 
@@ -94,8 +87,7 @@ export default class ScoreHolder implements IScoreHolder {
         resolve(score);
       };
 
-      matchWaiters.add(complete);
-      this.waiters.set(match, matchWaiters);
+      this.waiters.set(match, matchWaiters.add(complete));
 
       if (signal) {
         const abort = (): void => {
@@ -125,8 +117,7 @@ export default class ScoreHolder implements IScoreHolder {
     const matchSubscribers = this.subscribers.get(match) ?? new Set<ISubscription>();
     const subscription: ISubscription = { listener: onScore, active: true };
 
-    matchSubscribers.add(subscription);
-    this.subscribers.set(match, matchSubscribers);
+    this.subscribers.set(match, matchSubscribers.add(subscription));
 
     return () => {
       if (!matchSubscribers.delete(subscription)) {
@@ -155,14 +146,12 @@ export default class ScoreHolder implements IScoreHolder {
   private resolveWaiters(match: string, score: string): void {
     const matchWaiters = this.waiters.get(match);
 
-    if (matchWaiters) {
-      // Detach this publication's waiters before any later wait can be registered.
-      this.waiters.delete(match);
+    // Detach this publication's waiters before resolving them.
+    this.waiters.delete(match);
 
-      for (const resolve of matchWaiters) {
-        resolve(score);
-      }
-    }
+    matchWaiters?.forEach((resolve) => {
+      resolve(score);
+    });
   }
 
   private enqueueNotifications(match: string, score: string): void {

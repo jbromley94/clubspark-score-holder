@@ -17,10 +17,8 @@ export default async function waitForScore(
   };
   // IncomingMessage's close also occurs when a request body completes normally.
   // The response's close tells us whether this waiting client has gone away.
-  response.once('close', disconnect);
-  response.once('error', disconnect);
-  const timer = setTimeout(() => controller.abort(timeoutReason), timeoutMs);
-  timer.unref();
+  response.once('close', disconnect).once('error', disconnect);
+  const timer = setTimeout(() => controller.abort(timeoutReason), timeoutMs).unref();
 
   try {
     const score = await holder.waitForNextScore(match, controller.signal);
@@ -32,14 +30,12 @@ export default async function waitForScore(
       return;
     }
     if (error === timeoutReason) {
-      response.writeHead(204, { 'Cache-Control': 'no-store' });
-      response.end();
+      response.writeHead(204, { 'Cache-Control': 'no-store' }).end();
       return;
     }
     throw error;
   } finally {
     clearTimeout(timer);
-    response.off('close', disconnect);
-    response.off('error', disconnect);
+    response.off('close', disconnect).off('error', disconnect);
   }
 }

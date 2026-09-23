@@ -27,7 +27,7 @@ export default async function readScore(request: IncomingMessage): Promise<strin
   let payload: unknown;
   try {
     // Reject invalid UTF-8 instead of silently replacing bytes inside a stored score.
-    const json = new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks));
+    const json = new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks, bytes));
     payload = JSON.parse(json);
   } catch {
     throw new HttpError(400, 'Invalid JSON');

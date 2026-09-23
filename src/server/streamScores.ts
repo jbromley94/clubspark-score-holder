@@ -21,8 +21,7 @@ export default function streamScores(
     closed = true;
     clearInterval(heartbeat);
     unsubscribe?.();
-    response.off('close', cleanup);
-    response.off('error', disconnect);
+    response.off('close', cleanup).off('error', disconnect);
   };
   const disconnect = (): void => {
     cleanup();
@@ -47,8 +46,7 @@ export default function streamScores(
     }
   };
 
-  response.once('close', cleanup);
-  response.once('error', disconnect);
+  response.once('close', cleanup).once('error', disconnect);
   try {
     unsubscribe = holder.subscribe(match, (score) => {
       // JSON escapes newlines in identifiers and scores, preserving SSE frame boundaries.
@@ -62,8 +60,7 @@ export default function streamScores(
     // This comment flushes headers and lets terminal clients see that they are connected.
     write(': connected\n\n');
     if (!closed) {
-      heartbeat = setInterval(() => write(': heartbeat\n\n'), heartbeatIntervalMs);
-      heartbeat.unref();
+      heartbeat = setInterval(() => write(': heartbeat\n\n'), heartbeatIntervalMs).unref();
     }
   } catch (error) {
     cleanup();
